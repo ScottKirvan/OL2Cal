@@ -1,9 +1,7 @@
 # processes one liner pdf into a google calendar csv file
 # %%
-#import requests ## not used - for http requests, so you could grab a pdf file via url
 import re
 import pdfplumber
-#from datetime import time
 import datetime
 import argparse
 import os
@@ -31,6 +29,23 @@ def smart_open(filename=None):
     finally:
         if fh is not sys.stdout:
             fh.close()
+
+# For Python 2 you need this line
+from __future__ import print_function
+
+# writes to some_file
+with smart_open('some_file') as fh:
+    print('some output', file=fh)
+
+# writes to stdout
+with smart_open() as fh:
+    print('some output', file=fh)
+
+# writes to stdout
+with smart_open('-') as fh:
+    print('some output', file=fh)
+
+exit()
 
 # %%
 # command line parser
