@@ -15,6 +15,22 @@ days_re = re.compile(r'\* Day') # todo - need a better regex - specify start of 
 ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
 endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
 
+# %%
+import sys
+import contextlib
+
+@contextlib.contextmanager
+def smart_open(filename=None):
+    if filename and filename != '-':
+        fh = open(filename, 'w')
+    else:
+        fh = sys.stdout
+
+    try:
+        yield fh
+    finally:
+        if fh is not sys.stdout:
+            fh.close()
 
 # %%
 # command line parser
@@ -27,19 +43,19 @@ parser.add_argument(dest = "infile", metavar ='infile', nargs = 1, help = 'input
 #                    action ='append', 
 #                    help ='text pattern to search for')
   
-parser.add_argument('-v', dest ='verbose',
-                    action ='store_true', help ='verbose mode')
+#parser.add_argument('-v', dest ='verbose',
+#                    action ='store_true', help ='verbose mode')
 parser.add_argument('-o', dest ='outfile', 
                     action ='store', help ='output file')
-parser.add_argument('--speed', dest ='speed', 
-                    action ='store', choices = {'slow', 'fast'},
-                    default ='slow', help ='search speed')
+#parser.add_argument('--speed', dest ='speed', 
+#                    action ='store', choices = {'slow', 'fast'},
+#                    default ='slow', help ='search speed')
 args = parser.parse_args()
 
 print("infile", args.infile[0])
-print("verbose", args.verbose)
+#print("verbose", args.verbose)
 print("outfile", args.outfile)
-print("speed", args.speed)
+#print("speed", args.speed)
 #print("filename", os.path.basename(args.infile[0]))
 #exit()
 # %%
