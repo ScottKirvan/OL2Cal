@@ -13,3 +13,4 @@ sk One-Liner Parser
 - [ ] default config file location?  
 - [ ] handle output to file as well as stdout
 
+Testing editing on iPad
