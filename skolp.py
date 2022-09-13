@@ -1,5 +1,6 @@
 # processes one liner pdf into a google calendar csv file
 # %%
+from __future__ import print_function
 import re
 import pdfplumber
 import datetime
@@ -13,6 +14,32 @@ days_re = re.compile(r'\* Day') # todo - need a better regex - specify start of 
 ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
 endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
 
+# %%
+# command line parser
+  
+parser = argparse.ArgumentParser(description ='Process one-liner into Google Calendar CSV')
+  
+parser.add_argument(dest = "infile", metavar ='infile', nargs = 1, help = 'input filename (pdf)')
+#parser.add_argument('-p', '--pat', metavar ='pattern', 
+#                    required = True, dest ='patterns', 
+#                    action ='append', 
+#                    help ='text pattern to search for')
+  
+parser.add_argument('-v', dest ='verbose',
+                    action ='store_true', help ='verbose mode')
+parser.add_argument('-o', dest ='outfile', 
+                    action ='store', help ='output file')
+#parser.add_argument('--speed', dest ='speed', 
+#                    action ='store', choices = {'slow', 'fast'},
+#                    default ='slow', help ='search speed')
+args = parser.parse_args()
+
+if (args.verbose):
+    print("infile", args.infile[0])
+    print("verbose", args.verbose)
+    print("outfile", args.outfile)
+    #print("speed", args.speed)
+    #print("filename", os.path.basename(args.infile[0]))
 # %%
 import sys
 import contextlib
@@ -31,48 +58,21 @@ def smart_open(filename=None):
             fh.close()
 
 # For Python 2 you need this line
-from __future__ import print_function
 
 # writes to some_file
-with smart_open('some_file') as fh:
-    print('some output', file=fh)
+#with smart_open(args.outfile) as fh:
+#    print('some output 1', file=fh)
 
 # writes to stdout
-with smart_open() as fh:
-    print('some output', file=fh)
+#with smart_open() as fh:
+#    print('some output 2', file=fh)
 
 # writes to stdout
-with smart_open('-') as fh:
-    print('some output', file=fh)
+#with smart_open('-') as fh:
+#    print('some output 3', file=fh)
 
-exit()
-
-# %%
-# command line parser
-  
-parser = argparse.ArgumentParser(description ='Process one-liner into Google Calendar CSV')
-  
-parser.add_argument(dest = "infile", metavar ='infile', nargs = 1, help = 'input filename (pdf)')
-#parser.add_argument('-p', '--pat', metavar ='pattern', 
-#                    required = True, dest ='patterns', 
-#                    action ='append', 
-#                    help ='text pattern to search for')
-  
-#parser.add_argument('-v', dest ='verbose',
-#                    action ='store_true', help ='verbose mode')
-parser.add_argument('-o', dest ='outfile', 
-                    action ='store', help ='output file')
-#parser.add_argument('--speed', dest ='speed', 
-#                    action ='store', choices = {'slow', 'fast'},
-#                    default ='slow', help ='search speed')
-args = parser.parse_args()
-
-print("infile", args.infile[0])
-#print("verbose", args.verbose)
-print("outfile", args.outfile)
-#print("speed", args.speed)
-#print("filename", os.path.basename(args.infile[0]))
 #exit()
+
 # %%
 # grab the pdf as text
 
@@ -159,42 +159,17 @@ while i < len(days):
 # %%
 # format and output the data
 # todo - put in code to escape all commas in strings
-Subject = "Subject"
-Start_Date = "Start Date"
-Start_Time = "Start Time"
-End_Date = "End Date"
-End_Time = "End Time"
-All_day_event = "All day event"
-Description = "Description"
-Location = "Location"
-Private = "Private"
-Commas = ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
-
-row = ""
-row += Subject + ","
-row += Start_Date + ","
-row += Start_Time + ","
-row += End_Date + ","
-row += End_Time + ","
-row += All_day_event + ","
-row += Description + ","
-row += Location + ","
-row += Private + ","
-row += Commas
-print (row)
-
-i = 0
-while i < len(days):
-    Subject = "Day " + str(day_num[i]) + " - " + str(set_loc[i])
-    #Start_Date = str(call_date[i])
-    Start_Date = str(call[i].strftime("%m/%d/%Y"))
-    Start_Time = (call[i].strftime("%I:%M %p"))
-    All_day_event = "FALSE"
-    End_Date = str(wrap[i].strftime("%m/%d/%Y"))
-    End_Time = (wrap[i].strftime("%I:%M %p"))
-    Location = str(set_loc[i])
-    Private = "FALSE"
-    Description = "Origin file: " + os.path.basename(args.infile[0])
+with smart_open(args.outfile) as fh:
+    Subject = "Subject"
+    Start_Date = "Start Date"
+    Start_Time = "Start Time"
+    End_Date = "End Date"
+    End_Time = "End Time"
+    All_day_event = "All day event"
+    Description = "Description"
+    Location = "Location"
+    Private = "Private"
+    Commas = ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,"
 
     row = ""
     row += Subject + ","
@@ -207,7 +182,33 @@ while i < len(days):
     row += Location + ","
     row += Private + ","
     row += Commas
-    print (row)
-    i += 1
+    print (row, file=fh)
+
+    i = 0
+    while i < len(days):
+        Subject = "Day " + str(day_num[i]) + " - " + str(set_loc[i])
+        #Start_Date = str(call_date[i])
+        Start_Date = str(call[i].strftime("%m/%d/%Y"))
+        Start_Time = (call[i].strftime("%I:%M %p"))
+        All_day_event = "FALSE"
+        End_Date = str(wrap[i].strftime("%m/%d/%Y"))
+        End_Time = (wrap[i].strftime("%I:%M %p"))
+        Location = str(set_loc[i])
+        Private = "FALSE"
+        Description = "Origin file: " + os.path.basename(args.infile[0])
+
+        row = ""
+        row += Subject + ","
+        row += Start_Date + ","
+        row += Start_Time + ","
+        row += End_Date + ","
+        row += End_Time + ","
+        row += All_day_event + ","
+        row += Description + ","
+        row += Location + ","
+        row += Private + ","
+        row += Commas
+        print (row, file=fh)
+        i += 1
 
 # eof
