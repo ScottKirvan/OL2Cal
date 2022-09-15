@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # processes one liner pdf into a google calendar csv file
 # %%
 from __future__ import print_function
