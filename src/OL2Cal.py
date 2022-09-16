@@ -8,6 +8,7 @@ import pdfplumber
 import datetime
 import argparse
 import os
+import math
 
 # %%
 # command line parser
@@ -148,10 +149,12 @@ while i < len(days):
         call_time = (datetime.time(int(array[1])+hr_delta, int(array[2])))
     else:
         hour = int(array[1])
-        if hour == 12: 
+        if (args.format == 'FAM3'):
+            if (hour > 29):
+                hour = math.floor(hour/100)
+        if hour == 12:
             hour -= 12
-        print (hour, hr_delta)
-        #GORILLATITS call_time = (datetime.time(hour+hr_delta, 0))
+        call_time = (datetime.time(hour+hr_delta, 0))
 
     # extract set location
     set_loc.append(loc_desc[i][loc_desc[i].find('(')+1:loc_desc[i].find(')')])
@@ -168,12 +171,11 @@ while i < len(days):
     
     # set up the call and wrap datetime objects
     date_object = datetime.datetime.strptime(call_date, output_format)
-    #GORILLATITS calltime_object = date_object.replace(hour = call_time.hour, minute = call_time.minute)
-    #GORILLATITS call.append(calltime_object)
-    #GORILLATITS wrap.append(call[i] + datetime.timedelta(hours = 13))
+    calltime_object = date_object.replace(hour = call_time.hour, minute = call_time.minute)
+    call.append(calltime_object)
+    wrap.append(call[i] + datetime.timedelta(hours = 13))
     i += 1
 
-exit()
 
 # %%
 # format and output the data
@@ -207,11 +209,11 @@ with smart_open(args.outfile) as fh:
     while i < len(days):
         Subject = "Day " + str(day_num[i]) + " - " + str(set_loc[i])
         #Start_Date = str(call_date[i])
-        #GORILLATITS Start_Date = str(call[i].strftime("%m/%d/%Y"))
-        #GORILLATITS Start_Time = (call[i].strftime("%I:%M %p"))
+        Start_Date = str(call[i].strftime("%m/%d/%Y"))
+        Start_Time = (call[i].strftime("%I:%M %p"))
         All_day_event = "FALSE"
-        #GORILLATITS End_Date = str(wrap[i].strftime("%m/%d/%Y"))
-        #GORILLATITS End_Time = (wrap[i].strftime("%I:%M %p"))
+        End_Date = str(wrap[i].strftime("%m/%d/%Y"))
+        End_Time = (wrap[i].strftime("%I:%M %p"))
         Location = str(set_loc[i])
         Private = "FALSE"
         Description = "Origin file: " + os.path.basename(args.infile[0])
