@@ -9,13 +9,6 @@ import datetime
 import argparse
 import os
 
-# These are the different regex patterns that are used to find specific lines and details - these may need tweaking based on 
-# changes in the oneliner.  I think I'd like to see things like this moved to a config file
-
-days_re = re.compile(r'\* Day') # todo - need a better regex - specify start of line
-ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
-endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
-
 # %%
 # command line parser
   
@@ -27,21 +20,40 @@ parser.add_argument(dest = "infile", metavar ='infile', nargs = 1, help = 'input
 #                    action ='append', 
 #                    help ='text pattern to search for')
   
+parser.add_argument('-d', dest ='dumppdf',
+                    action ='store_true', help ='dump pdf contents and exit')
 parser.add_argument('-v', dest ='verbose',
                     action ='store_true', help ='verbose mode')
 parser.add_argument('-o', dest ='outfile', 
                     action ='store', help ='output file')
-#parser.add_argument('--speed', dest ='speed', 
-#                    action ='store', choices = {'slow', 'fast'},
-#                    default ='slow', help ='search speed')
+parser.add_argument('-f', '--format', dest ='format', 
+                    action ='store', choices = {'FAM1', 'FAM2', 'FAM3'},
+                    default ='FAM1', help ='Oneliner format specifier')
 args = parser.parse_args()
 
 if (args.verbose):
-    print("infile", args.infile[0])
-    print("verbose", args.verbose)
-    print("outfile", args.outfile)
-    #print("speed", args.speed)
-    #print("filename", os.path.basename(args.infile[0]))
+    print("command line args:")
+    print(" infile  :", args.infile[0])
+    print(" verbose :", args.verbose)
+    print(" outfile :", args.outfile)
+    print(" dumppdf :", args.dumppdf)
+    print(" format  :", args.format)
+    print(" filename:", os.path.basename(args.infile[0]))
+
+# %%
+# These are the different regex patterns that are used to find specific lines and details - these may need tweaking based on 
+# changes in the oneliner.  I think I'd like to see things like this moved to a config file
+if (args.format == 'FAM1'):
+    days_re = re.compile(r'\* Day') # todo - need a better regex - specify start of line
+    ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
+    endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
+elif (args.format == 'FAM2'):
+    endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
+elif (args.format == 'FAM3'):
+    days_re = re.compile(r'\*DAY') # todo - need a better regex - specify start of line
+    ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
+    endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
+
 # %%
 import sys
 import contextlib
@@ -58,8 +70,6 @@ def smart_open(filename=None):
     finally:
         if fh is not sys.stdout:
             fh.close()
-
-# For Python 2 you need this line
 
 # writes to some_file
 #with smart_open(args.outfile) as fh:
@@ -90,6 +100,11 @@ with pdfplumber.open(oneliner) as pdf:
 line = []
 for line_tmp in text.split('\n'):
     line.append(line_tmp)
+    
+if (args.dumppdf):
+    for f in line:
+        print (f)
+    exit()
 
 # %%
 # dig through and find the important info for each shooting day
@@ -135,7 +150,8 @@ while i < len(days):
         hour = int(array[1])
         if hour == 12: 
             hour -= 12
-        call_time = (datetime.time(hour+hr_delta, 0))
+        print (hour, hr_delta)
+        #GORILLATITS call_time = (datetime.time(hour+hr_delta, 0))
 
     # extract set location
     set_loc.append(loc_desc[i][loc_desc[i].find('(')+1:loc_desc[i].find(')')])
@@ -152,11 +168,12 @@ while i < len(days):
     
     # set up the call and wrap datetime objects
     date_object = datetime.datetime.strptime(call_date, output_format)
-    calltime_object = date_object.replace(hour = call_time.hour, minute = call_time.minute)
-    call.append(calltime_object)
-    wrap.append(call[i] + datetime.timedelta(hours = 13))
+    #GORILLATITS calltime_object = date_object.replace(hour = call_time.hour, minute = call_time.minute)
+    #GORILLATITS call.append(calltime_object)
+    #GORILLATITS wrap.append(call[i] + datetime.timedelta(hours = 13))
     i += 1
 
+exit()
 
 # %%
 # format and output the data
@@ -190,11 +207,11 @@ with smart_open(args.outfile) as fh:
     while i < len(days):
         Subject = "Day " + str(day_num[i]) + " - " + str(set_loc[i])
         #Start_Date = str(call_date[i])
-        Start_Date = str(call[i].strftime("%m/%d/%Y"))
-        Start_Time = (call[i].strftime("%I:%M %p"))
+        #GORILLATITS Start_Date = str(call[i].strftime("%m/%d/%Y"))
+        #GORILLATITS Start_Time = (call[i].strftime("%I:%M %p"))
         All_day_event = "FALSE"
-        End_Date = str(wrap[i].strftime("%m/%d/%Y"))
-        End_Time = (wrap[i].strftime("%I:%M %p"))
+        #GORILLATITS End_Date = str(wrap[i].strftime("%m/%d/%Y"))
+        #GORILLATITS End_Time = (wrap[i].strftime("%I:%M %p"))
         Location = str(set_loc[i])
         Private = "FALSE"
         Description = "Origin file: " + os.path.basename(args.infile[0])
