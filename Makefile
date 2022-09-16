@@ -6,7 +6,7 @@ all : stdout
 
 .PHONY: test
 stdout:
-	src/OL2Cal.py --format $(IN_FMT) $(IN_FILE)
+	src/OL2Cal.py --format $(IN_FMT) -o $(OUT_FILE) $(IN_FILE)
 
 .PHONY: noargs
 noargs:
