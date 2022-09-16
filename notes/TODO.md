@@ -10,10 +10,11 @@ TODO
 - [ ] option:  change assumed hrs in day  
 - [ ] use pattern matching / rules specified in a config file  - the problem is the changes required to parse certain filetypes - I'm thinking this might be abstractable to a certain degree
 - [ ] default config file location?  
+- [ ] add support for ical format
 
 In Progress
 -----------
-- [ ] get a second format importing
+- [ ] get a second format importing (FAM2)
 
 Done ✓
 ------
