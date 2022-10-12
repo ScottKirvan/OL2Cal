@@ -2,44 +2,18 @@
 
 # processes one liner pdf into a google calendar csv file
 # %%
-from __future__ import print_function
+#from __future__ import print_function
 import re
 import pdfplumber
 import datetime
-import argparse
-import os
+#import argparse
+#import os
 import math
+#
+import ProcessCL
 
 # %%
-# command line parser
-  
-parser = argparse.ArgumentParser(description ='Process one-liner into Google Calendar CSV')
-  
-parser.add_argument(dest = "infile", metavar ='infile', nargs = 1, help = 'input filename (pdf)')
-#parser.add_argument('-p', '--pat', metavar ='pattern', 
-#                    required = True, dest ='patterns', 
-#                    action ='append', 
-#                    help ='text pattern to search for')
-  
-parser.add_argument('-d', dest ='dumppdf',
-                    action ='store_true', help ='dump pdf contents and exit')
-parser.add_argument('-v', dest ='verbose',
-                    action ='store_true', help ='verbose mode')
-parser.add_argument('-o', dest ='outfile', 
-                    action ='store', help ='output file')
-parser.add_argument('-f', '--format', dest ='format', 
-                    action ='store', choices = {'FAM1', 'FAM2', 'FAM3'},
-                    default ='FAM1', help ='Oneliner format specifier')
-args = parser.parse_args()
-
-if (args.verbose):
-    print("command line args:")
-    print(" infile  :", args.infile[0])
-    print(" verbose :", args.verbose)
-    print(" outfile :", args.outfile)
-    print(" dumppdf :", args.dumppdf)
-    print(" format  :", args.format)
-    print(" filename:", os.path.basename(args.infile[0]))
+args = ProcessCL.Init()
 
 # %%
 # These are the different regex patterns that are used to find specific lines and details - these may need tweaking based on 
@@ -49,8 +23,6 @@ if (args.format == 'FAM1'):
     ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
     endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
 elif (args.format == 'FAM2'):
-    endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
-elif (args.format == 'FAM3'):
     days_re = re.compile(r'\*DAY') # todo - need a better regex - specify start of line
     ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
     endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
@@ -90,6 +62,13 @@ def smart_open(filename=None):
 # grab the pdf as text
 
 oneliner = args.infile[0]
+import inspect
+frame = inspect.currentframe()
+# __FILE__
+#fileName  =  frame.f_code.co_filename
+# __LINE__
+#__line__ = frame.f_lineno
+print ("xxx", oneliner, __file__, frame.f_lineno)
 
 text=''
 with pdfplumber.open(oneliner) as pdf:
@@ -149,7 +128,7 @@ while i < len(days):
         call_time = (datetime.time(int(array[1])+hr_delta, int(array[2])))
     else:
         hour = int(array[1])
-        if (args.format == 'FAM3'):
+        if (args.format == 'FAM2'):
             if (hour > 29):
                 hour = math.floor(hour/100)
         if hour == 12:
