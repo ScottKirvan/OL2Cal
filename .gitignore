@@ -1,4 +1,4 @@
 some_file
 *.csv
 private/*
-src/__pycache__/ProcessCL.cpython-38.pyc
+src/__pycache__/*
