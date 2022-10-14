@@ -8,12 +8,13 @@ TODO
 ----
 - [ ] error reporting  
 - [ ] option:  change assumed hrs in day  
-- [ ] use pattern matching / rules specified in a config file  - the problem is the changes required to parse certain filetypes - I'm thinking this might be abstractable to a certain degree
 - [ ] default config file location?  
+- [ ] add support for ical format
+- [ ] instead of config file, move each format specific parts to their own modules and use a conditional to use the correct implementation
+- [ ] document README.md
 
 In Progress
 -----------
-- [ ] get a second format importing
 
 Done ✓
 ------
@@ -21,3 +22,9 @@ Done ✓
 - [x] open specified filename rather than hardcoded one  
 - [x] optionally write to file, insted of stdout [default]  
 - [x] handle output to file as well as stdout
+- [x] get a second format importing (FAM2)
+
+Not Gonna Do ✓
+------
+- [x] use pattern matching / rules specified in a config file  - the problem is the changes required to parse certain filetypes - I'm thinking this might be abstractable to a certain degree
+    - replaced with the idea of using specific module implementations for each format 

@@ -1,3 +1,4 @@
 some_file
 *.csv
 private/*
+src/__pycache__/*
