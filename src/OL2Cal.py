@@ -87,15 +87,14 @@ class events:
     wrap = []
 
 if (args.format == 'FAM1'):
-    days_re = re.compile(r'\* Day') # todo - need a better regex - specify start of line
-    ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
-    endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
+    import FAM1 as OLProcessor
 elif (args.format == 'FAM2'):
-    import FAM2
-    FAM2.Process(events, line)
+    import FAM2 as OLProcessor
 else:
     print ("Error: Unknown format, \"%s\"" % (args.format))
     exit()
+
+OLProcessor.Process(events, line)
 
 # %%
 # format and output the data
