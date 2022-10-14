@@ -56,7 +56,9 @@ import inspect
 frame = inspect.currentframe()
 
 from DBPrint import DebugPrint 
+import DBPrint
 #DebugPrint(__file__, frame.f_lineno, "boowah!  %s, and %d, and %d" % (oneliner, 2, 3))
+DBPrint.enable(args.debug)
 
 text=''
 with pdfplumber.open(oneliner) as pdf:

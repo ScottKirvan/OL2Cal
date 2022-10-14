@@ -16,6 +16,8 @@ def Init():
                         action ='store_true', help ='print pdf contents and exit')
     parser.add_argument('-v', dest ='verbose',
                         action ='store_true', help ='verbose mode')
+    parser.add_argument('-db', dest ='debug',
+                        action ='store_true', help ='debug prints mode')
     parser.add_argument('-o', dest ='outfile', 
                         action ='store', help ='output file')
     parser.add_argument('-f', '--format', dest ='format', 
@@ -27,6 +29,7 @@ def Init():
         print("command line args:")
         print(" infile  :", args.infile[0])
         print(" verbose :", args.verbose)
+        print(" debug :", args.debug)
         print(" outfile :", args.outfile)
         print(" dumppdf :", args.dumppdf)
         print(" format  :", args.format)

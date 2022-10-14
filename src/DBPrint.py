@@ -5,7 +5,18 @@
 # frame = inspect.currentframe()
 # DebugPrint(__file__, frame.f_lineno, "boowah!  %s, and %d, and %d" % (oneliner, 2, 3))
 
+_enabled = False
+
+def SetEnabled(enableit):
+    global _enabled
+    _enabled = enableit
+
+def GetEnabled():
+    global _enabled
+    return _enabled
+
 def _DebugPrint(filename, linenumber, *xargs):
-    print('%s(%d): %s' % (filename, linenumber,  "%s" % (xargs)))
+    if (_enabled):
+        print('%s(%d): %s' % (filename, linenumber,  "%s" % (xargs)))
 
 DebugPrint = _DebugPrint
