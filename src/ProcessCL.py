@@ -13,7 +13,7 @@ def Init():
     #                    help ='text pattern to search for')
     
     parser.add_argument('-d', dest ='dumppdf',
-                        action ='store_true', help ='dump pdf contents and exit')
+                        action ='store_true', help ='print pdf contents and exit')
     parser.add_argument('-v', dest ='verbose',
                         action ='store_true', help ='verbose mode')
     parser.add_argument('-o', dest ='outfile', 
