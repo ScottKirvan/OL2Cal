@@ -7,25 +7,13 @@ import re
 import pdfplumber
 import datetime
 #import argparse
-#import os
+import os
 import math
 #
 import ProcessCL
 
 # %%
 args = ProcessCL.Init()
-
-# %%
-# These are the different regex patterns that are used to find specific lines and details - these may need tweaking based on 
-# changes in the oneliner.  I think I'd like to see things like this moved to a config file
-if (args.format == 'FAM1'):
-    days_re = re.compile(r'\* Day') # todo - need a better regex - specify start of line
-    ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
-    endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
-elif (args.format == 'FAM2'):
-    days_re = re.compile(r'\*DAY') # todo - need a better regex - specify start of line
-    ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
-    endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
 
 # %%
 import sys
@@ -62,13 +50,13 @@ def smart_open(filename=None):
 # grab the pdf as text
 
 oneliner = args.infile[0]
+
+
 import inspect
 frame = inspect.currentframe()
-# __FILE__
-#fileName  =  frame.f_code.co_filename
-# __LINE__
-#__line__ = frame.f_lineno
-print ("xxx", oneliner, __file__, frame.f_lineno)
+
+from DBPrint import DebugPrint 
+#DebugPrint(__file__, frame.f_lineno, "boowah!  %s, and %d, and %d" % (oneliner, 2, 3))
 
 text=''
 with pdfplumber.open(oneliner) as pdf:
@@ -87,58 +75,61 @@ if (args.dumppdf):
     exit()
 
 # %%
-# dig through and find the important info for each shooting day
+# These are the different regex patterns that are used to find specific lines and details - these may need tweaking based on 
+# changes in the oneliner.  I think I'd like to see things like this moved to a config file
+if (args.format == 'FAM1'):
+    days_re = re.compile(r'\* Day') # todo - need a better regex - specify start of line
+    ampm_re = re.compile(r'pm \*') # todo - need a better regex - specify end of line 
+    endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
+elif (args.format == 'FAM2'):
+    #days_re = re.compile(r'^DAY |^DOUBLE ') # todo - need a better regex - specify start of line
+    days_re = re.compile(r'Estimated ') # todo - need a better regex - specify start of line
+    ampm_re = re.compile(r'pm') # todo - need a better regex - specify end of line 
+    endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
+    locdesc_re = re.compile(r'Int |Ext |INT') # todo - need a better regex
+
+# dig through and find the "important info" for each shooting day
 i = 0
 days = []
 loc_desc = []
 end_day = []
+DebugPrint(__file__, frame.f_lineno, "len(line): (%d)" % (len(line)))
 while i < len(line):
-    if days_re.search(line[i]):  # find the line that starts with "* Day"
+    if days_re.search(line[i]):  # find the "Estimated Crew Call" line
         hr_delta = 0
-        days.append(line[i])
-        s = line[i+1]  # this next line will contain the location (first set location and story location)
-        loc_desc.append(s)  #this is the full location line - story and set
+        days.append(line[i]) # this has our call time (call)
+        DebugPrint(__file__, frame.f_lineno, "days:  %s" % (line[i]))
+        while i < len(line) and not locdesc_re.search(line[i]):
+            i += 1
+        loc_desc.append(line[i]) # this has our script location (set_loc)
+        DebugPrint(__file__, frame.f_lineno, "loc_desc:  %s" % (line[i]))
         while i < len(line) and not endday_re.search(line[i]):
             i += 1
-        end_day.append(line[i])
+        end_day.append(line[i]) # this has our day number (day_num) and call date (call_date)
+        DebugPrint(__file__, frame.f_lineno, "end_day: (%d) %s" % (i, line[i]))
     i += 1
-
 
 # %%
 # from that "important info", extract actual details that we want to import to gcal
 i = 0
-call_date = []
+call_date = [] # temp var
 day_num = []
 set_loc = []
-calltime_object = [] # includes date
+calltime_object = [] # includes date - temp var
 call = []
 wrap = []
+DebugPrint(__file__, frame.f_lineno, "%d days" % (len(days)))
 while i < len(days):
     # extract all the numbers we need to process the Day line (day, call time)
-    array = re.findall(r'[0-9]+', days[i]) 
+    array = re.findall(r'[0-9]+', end_day[i]) 
 
-    # extract day number
+    # parse out day number (day_num)
+    DebugPrint(__file__, frame.f_lineno, "day_num:  %s" % (array[0]))
     day_num.append(array[0])
 
-    #extract call_time
-    hr_delta = 0
-    if ampm_re.search(days[i]):  # time formatting - into python datetime
-        hr_delta = 12
-    if len(array) == 3:
-        call_time = (datetime.time(int(array[1])+hr_delta, int(array[2])))
-    else:
-        hour = int(array[1])
-        if (args.format == 'FAM2'):
-            if (hour > 29):
-                hour = math.floor(hour/100)
-        if hour == 12:
-            hour -= 12
-        call_time = (datetime.time(hour+hr_delta, 0))
+    DebugPrint(__file__, frame.f_lineno, "array:  %s" % (array))
 
-    # extract set location
-    set_loc.append(loc_desc[i][loc_desc[i].find('(')+1:loc_desc[i].find(')')])
-    
-    # parse out call date
+    # parse out call date (call_date)
     matches = re.findall(
         r'((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d+,\s+\d+)',
         end_day[i])
@@ -147,7 +138,31 @@ while i < len(days):
     for match in matches:
         new_date = datetime.datetime.strptime(match, input_format).strftime(output_format)
         call_date = new_date
+    DebugPrint(__file__, frame.f_lineno, "call_date:  %s" % (call_date))
     
+    # parse out set location
+    set_loc.append(loc_desc[i][loc_desc[i].find('(')+1:loc_desc[i].find(')')])
+    DebugPrint(__file__, frame.f_lineno, "set_loc:  %s" % ( loc_desc[i][loc_desc[i].find('(')+1:loc_desc[i].find(')')]))
+    
+
+    #extract call_time
+    hr_delta = 0
+    if ampm_re.search(days[i]):  # time formatting - into python datetime
+        hr_delta = 12
+    array = re.findall(r'[0-9]+', days[i]) 
+    DebugPrint(__file__, frame.f_lineno, "len(array):  %d" % ( len(array)))
+    DebugPrint(__file__, frame.f_lineno, "array:  %s" % (array))
+    if len(array) == 2:
+        call_time = (datetime.time(int(array[0])+hr_delta, int(array[1])))
+    else:
+        hour = int(array[0])
+        if (hour > 29):
+            hour = math.floor(hour/100)
+        if hour == 12:
+            hour -= 12
+        call_time = (datetime.time(hour+hr_delta, 0))
+    DebugPrint(__file__, frame.f_lineno, "call_time:  %s" % (call_time))
+
     # set up the call and wrap datetime objects
     date_object = datetime.datetime.strptime(call_date, output_format)
     calltime_object = date_object.replace(hour = call_time.hour, minute = call_time.minute)
@@ -187,7 +202,6 @@ with smart_open(args.outfile) as fh:
     i = 0
     while i < len(days):
         Subject = "Day " + str(day_num[i]) + " - " + str(set_loc[i])
-        #Start_Date = str(call_date[i])
         Start_Date = str(call[i].strftime("%m/%d/%Y"))
         Start_Time = (call[i].strftime("%I:%M %p"))
         All_day_event = "FALSE"
