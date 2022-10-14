@@ -77,6 +77,9 @@ if (args.dumppdf):
     exit()
 
 # %%
+import importlib
+OLProcessor = importlib.import_module(args.format) # equivalent to 'import FAM2 as OLProcssor'
+
 from dataclasses import dataclass
 @dataclass
 class events:
@@ -85,14 +88,6 @@ class events:
     set_loc = []
     call = []
     wrap = []
-
-if (args.format == 'FAM1'):
-    import FAM1 as OLProcessor
-elif (args.format == 'FAM2'):
-    import FAM2 as OLProcessor
-else:
-    print ("Error: Unknown format, \"%s\"" % (args.format))
-    exit()
 
 OLProcessor.Process(events, line)
 

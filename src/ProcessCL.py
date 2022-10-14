@@ -21,7 +21,7 @@ def Init():
     parser.add_argument('-o', dest ='outfile', 
                         action ='store', help ='output file')
     parser.add_argument('-f', '--format', dest ='format', 
-                        action ='store', choices = {'FAM1', 'FAM2'},
+                        action ='store', choices = {'FAM1', 'FAM2', 'FAM3'},
                         default ='FAM1', help ='Oneliner format specifier')
     args = parser.parse_args()
 
