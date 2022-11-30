@@ -21,4 +21,4 @@ optional arguments:
 ```
 
 ## Examples:
-see Makefile
+see [Makefile](https://github.com/ScottKirvan/OL2Cal/blob/main/Makefile)
