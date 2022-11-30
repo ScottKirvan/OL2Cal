@@ -78,6 +78,7 @@ if (args.dumppdf):
 
 # %%
 import importlib
+# lib name comes from CLParser - CLParser enforces format naming
 OLProcessor = importlib.import_module(args.format) # equivalent to 'import FAM2 as OLProcssor'
 
 from dataclasses import dataclass
@@ -119,6 +120,7 @@ with smart_open(args.outfile) as fh:
     row += Commas
     print (row, file=fh)
 
+escape the subject and location -- escape commas for csv
     i = 0
     DebugPrint(__file__, frame.f_lineno, "len(events.days):  %s" % (len(events.days)))
     while i < len(events.days):

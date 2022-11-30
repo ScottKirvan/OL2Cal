@@ -1,3 +1,4 @@
+# FAM4_403_404_HybridBoard.pdf - note no call times
 
 import re 
 from DBPrint import DebugPrint 
@@ -8,7 +9,7 @@ frame = inspect.currentframe()
 
 def Process(events, line = []):
     #days_re = re.compile(r'^DAY |^DOUBLE ') # todo - need a better regex - specify start of line
-    days_re = re.compile(r'Estimated ') # todo - need a better regex - specify start of line
+    days_re = re.compile(r'BLOCK |DOUBLE ') # todo - need a better regex - specify start of line
     ampm_re = re.compile(r'pm') # todo - need a better regex - specify end of line 
     endday_re = re.compile(r'End Day # ') # todo - need a better regex - specify start of line
     locdesc_re = re.compile(r'Int |Ext |INT') # todo - need a better regex
@@ -66,11 +67,12 @@ def Process(events, line = []):
         DebugPrint(__file__, frame.f_lineno, "call_date:  %s" % (call_date))
         
         # parse out set location
-        set_loc.append(loc_desc[i][loc_desc[i].find('(')+1:loc_desc[i].find(')')])
+        #set_loc.append(loc_desc[i][loc_desc[i].find('(')+1:loc_desc[i].find(')')])
+        set_loc.append(loc_desc[i])
         DebugPrint(__file__, frame.f_lineno, "set_loc:  %s" % ( loc_desc[i][loc_desc[i].find('(')+1:loc_desc[i].find(')')]))
         
 
-        #extract call_time
+        #extract call_time - there is no call time in this version of the sheet
         hr_delta = 0
         if ampm_re.search(days[i]):  # time formatting - into python datetime
             hr_delta = 12
@@ -78,14 +80,15 @@ def Process(events, line = []):
         DebugPrint(__file__, frame.f_lineno, "len(array):  %d" % ( len(array)))
         DebugPrint(__file__, frame.f_lineno, "array:  %s" % (array))
         if len(array) == 2:
-            call_time = (datetime.time(int(array[0])+hr_delta, int(array[1])))
+            #call_time = (datetime.time(int(array[0])+hr_delta, int(array[1])))
+            call_time = (datetime.time(7, 0)) #we'll just set this to 7 am
         else:
             hour = int(array[0])
             if (hour > 29):
                 hour = math.floor(hour/100)
             if hour == 12:
                 hour -= 12
-            call_time = (datetime.time(hour+hr_delta, 0))
+            call_time = (datetime.time(7, 0))
         DebugPrint(__file__, frame.f_lineno, "call_time:  %s" % (call_time))
 
         # set up the call and wrap datetime objects
